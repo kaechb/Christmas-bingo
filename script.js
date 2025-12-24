@@ -34,6 +34,8 @@ const specialBingoSounds = {
   5: new Audio("sounds/fivebingos.mp3"),
   crazy: new Audio("sounds/crazybingo.mp3")
 };
+const soundEnabledSound = new Audio("sounds/soundenabled.mp3");
+soundEnabledSound.volume = 0.8;
 
 [...bingoSounds, ...Object.values(specialBingoSounds)].forEach(s => {
   s.volume = 0.8;
@@ -226,16 +228,13 @@ resetBtn.addEventListener("click", () => {
 });
 
 soundBtn.addEventListener("click", () => {
-  const sound = bingoSounds[0];
+    soundEnabledSound.currentTime = 0;
 
-  sound.currentTime = 0;
-  sound.play().then(() => {
-    sound.pause();
-    sound.currentTime = 0;
-    soundEnabled = true;
-    soundBtn.textContent = "🔊 Sound enabled";
-  }).catch(() => {});
-});
+    soundEnabledSound.play().then(() => {
+      soundEnabled = true;
+      soundBtn.textContent = "🔊 Sound enabled";
+    }).catch(() => {});
+  });
 
 /* ---------------------------
    INIT
