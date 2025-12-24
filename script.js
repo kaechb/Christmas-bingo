@@ -3,7 +3,7 @@
 ---------------------------- */
 
 const GRID_SIZE = 4;
-const STORAGE_KEY = "christmas-bingo-state";
+const STORAGE_KEY = "bullshit-bingo-state";
 
 /* ---------------------------
    STATE
@@ -232,7 +232,7 @@ soundBtn.addEventListener("click", () => {
 
     soundEnabledSound.play().then(() => {
       soundEnabled = true;
-      soundBtn.textContent = "🔊 Sound enabled";
+      soundBtn.textContent = "🔊 Ton aktiviert";
     }).catch(() => {});
   });
 
