@@ -101,3 +101,78 @@
   .app.bingo {
     animation: bingoFlash 0.8s ease-in-out 2;
   }
+  .lang-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .lang-btn {
+    width: 72px;
+    height: 72px;
+    font-size: 36px;
+    border-radius: 16px;
+    background: #1e293b;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lang-btn:active {
+    transform: scale(0.95);
+  }
+
+  .bottom-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .back-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 12px;
+    background: #1e293b;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #finish-screen {
+    position: fixed;
+    inset: 0;
+    background-image: url("finish.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .finish-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    text-align: center;
+
+    background: rgba(15, 23, 42, 0.75);
+    border-radius: 20px;
+    backdrop-filter: blur(6px);
+  }
+
+  .finish-container h1 {
+    margin-bottom: 12px;
+  }
+
+  .finish-text {
+    font-size: 16px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }

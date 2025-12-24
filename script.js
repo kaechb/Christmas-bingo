@@ -4,11 +4,13 @@
 
 const GRID_SIZE = 4;
 const STORAGE_KEY = "bullshit-bingo-state";
+const LANG_KEY = "bullshit-bingo-lang";
 
 /* ---------------------------
    STATE
 ---------------------------- */
 
+let currentLanguage = null; // "en" or "gsw"
 let bingoCount = 0;
 let completedLines = new Set();
 let boardState = [];
@@ -17,29 +19,67 @@ let cells = [];
 let soundEnabled = false;
 
 /* ---------------------------
+   TEXT
+---------------------------- */
+
+const TEXT = {
+    en: {
+      subtitle: "Tap events as they happen",
+      enableSound: "🔊 Enable sound",
+      soundEnabled: "🔊 Sound enabled",
+      reset: "New card",
+      bingo1: "🎉 BINGO! Take a shot 🥃",
+      bingoN: n => `🎉 ${n}× BINGO! Take a shot 🥃`,
+      finish:
+        "You won the bingo, there are no prizes, but at least you are drunk now."
+    },
+    gsw: {
+      subtitle: "Berühr Situatione wo passiered",
+      enableSound: "🔊 Mit Ton",
+      soundEnabled: "🔊 Ton aktiviert",
+      reset: "Neui Charte",
+      bingo1: "🎉 BINGO! Gratis Schnaps 🥃",
+      bingoN: n => `🎉 ${n}× BINGO! Und en Schnaps 🥃`,
+      finish:
+        "Gratuliere, du hesch gwunne! Es gid leider ke Priise aber immerhin bisch jetzt bsoffe."
+    }
+  };
+
+/* ---------------------------
    AUDIO
 ---------------------------- */
 
-const bingoSounds = [
-  new Audio("sounds/bingo1.mp3"),
-  new Audio("sounds/bingo2.mp3"),
-  new Audio("sounds/bingo3.mp3"),
-  new Audio("sounds/bingo4.mp3")
-];
+let bingoSounds = [];
+let specialBingoSounds = {};
+let soundEnabledSound = null;
 
-const specialBingoSounds = {
-  2: new Audio("sounds/doublebingo.mp3"),
-  3: new Audio("sounds/triplebingo.mp3"),
-  4: new Audio("sounds/quadruplebingo.mp3"),
-  5: new Audio("sounds/fivebingos.mp3"),
-  crazy: new Audio("sounds/crazybingo.mp3")
-};
-const soundEnabledSound = new Audio("sounds/soundenabled.mp3");
-soundEnabledSound.volume = 0.8;
+function loadSounds() {
+  const basePath =
+    currentLanguage === "gsw" ? "sounds_swissgerman" : "sounds";
+  const ext = currentLanguage === "gsw" ? "wav" : "mp3";
 
-[...bingoSounds, ...Object.values(specialBingoSounds)].forEach(s => {
-  s.volume = 0.8;
-});
+  bingoSounds = [
+    new Audio(`${basePath}/bingo1.${ext}`),
+    new Audio(`${basePath}/bingo2.${ext}`),
+    new Audio(`${basePath}/bingo3.${ext}`),
+    new Audio(`${basePath}/bingo4.${ext}`)
+  ];
+
+  specialBingoSounds = {
+    2: new Audio(`${basePath}/doublebingo.${ext}`),
+    3: new Audio(`${basePath}/triplebingo.${ext}`),
+    4: new Audio(`${basePath}/quadruplebingo.${ext}`),
+    5: new Audio(`${basePath}/fivebingos.${ext}`),
+    crazy: new Audio(`${basePath}/crazybingo.${ext}`)
+  };
+
+  soundEnabledSound = new Audio(`${basePath}/soundenabled.${ext}`);
+  soundEnabledSound.volume = 0.8;
+
+  [...bingoSounds, ...Object.values(specialBingoSounds)].forEach(s => {
+    s.volume = 0.8;
+  });
+}
 
 function playBingoSound(count) {
   if (!soundEnabled) return;
@@ -61,39 +101,58 @@ function playBingoSound(count) {
    DATA
 ---------------------------- */
 
-const EVENTS = [
-  "\"Mittlerwiile chammer you nur no SVP wähle\"",
-  "\"FDP isch en gueti Partei\"",
-  "N-wort",
-  "Oliver wird fertiggmacht",
-  "Felix seid was licht frauefeindlichs",
-  "Peter bringt sin eigene Wii mit",
-  "\"Wieso gahds so lang bis de lachs gschnitte isch\"",
-  "Peter sexismus",
-  "Ueli seid 10 minute lang nüt",
-  "\"Euri chinder sind so smart\"",
-  "Oliver und Felix flexed",
-  "Oliver sini Karriere",
-  "De Lachs das Jahr isch speziell gut",
-  "Felix: Ich iss ke chalte Fisch",
-  "Eis chinnd chotzt",
-  "Immobiliepriise",
-  "Erziehungstyps",
-  "Fraue redet über Stille",
-  "Fraue werdet gfragt wenns so wiit esch",
-  "Das Jahr isch d Ernti schlecht gsi",
-  "Giorgia lütet ah"
-];
+const EVENTS = {
+  en: [
+    "Politics are mentioned",
+    "Awkward silence",
+    "Wine gets spilled",
+    "Someone talks about work too long",
+    "A phone rings at the table",
+    "Someone flexes their career",
+    "The food is discussed critically",
+    "Someone mentions crypto",
+    "A child cries",
+    "Someone checks their phone",
+    "Old family story",
+    "Unexpected guest",
+    "Complaints about prices",
+    "Discussion about parenting",
+    "Someone praises the food loudly",
+    "TV gets turned on"
+  ],
+  gsw: [
+    "\"Mittlerwiile chammer you nur no SVP wähle\"",
+    "\"FDP isch en gueti Partei\"",
+    "Oliver wird fertiggmacht",
+    "Felix seid was licht frauefeindlichs",
+    "Peter bringt sin eigene Wii mit",
+    "\"Wieso gahds so lang bis de Lachs gschnitte isch\"",
+    "Peter Sexismus",
+    "Ueli seid 10 Minute lang nüt",
+    "\"Euri Chinder sind so smart\"",
+    "Oliver und Felix flexed",
+    "Oliver sini Karriere",
+    "De Lachs isch dieses Jahr speziell guet",
+    "Felix isst ke chalte Fisch",
+    "Eis Chind chotzt",
+    "Immobiliepriise",
+    "Giorgia lütet ah"
+  ]
+};
 
 /* ---------------------------
    DOM
 ---------------------------- */
 
+const langScreen = document.getElementById("lang-screen");
+const bingoScreen = document.getElementById("bingo-screen");
+
 const gridEl = document.getElementById("bingo-grid");
 const statusEl = document.getElementById("status");
 const resetBtn = document.getElementById("reset-btn");
 const soundBtn = document.getElementById("sound-btn");
-
+const subtitleEl = document.getElementById("subtitle");
+const backBtn = document.getElementById("back-btn");
 /* ---------------------------
    HELPERS
 ---------------------------- */
@@ -115,22 +174,6 @@ function saveState() {
       completedLines: Array.from(completedLines)
     })
   );
-}
-
-function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return false;
-
-  try {
-    const data = JSON.parse(raw);
-    boardState = data.boardState;
-    markedState = data.markedState;
-    bingoCount = data.bingoCount || 0;
-    completedLines = new Set(data.completedLines || []);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 /* ---------------------------
@@ -160,19 +203,15 @@ function renderBoard() {
     gridEl.appendChild(cell);
     cells.push(cell);
   });
-
-  checkBingo();
 }
 
 function createNewBoard() {
   bingoCount = 0;
   completedLines.clear();
-  boardState = shuffle(EVENTS).slice(0, GRID_SIZE * GRID_SIZE);
+  boardState = shuffle(EVENTS[currentLanguage]).slice(0, GRID_SIZE * GRID_SIZE);
   markedState = Array(GRID_SIZE * GRID_SIZE).fill(false);
 
   statusEl.textContent = "";
-  document.querySelector(".app").classList.remove("bingo");
-
   saveState();
   renderBoard();
 }
@@ -209,39 +248,92 @@ function checkBingo() {
 
     statusEl.textContent =
       bingoCount === 1
-        ? "🎉 BINGO! Gratis Schnaps 🥃"
-        : `🎉 ${bingoCount}× BINGO! Und en Schnaps 🥃`;
+        ? TEXT[currentLanguage].bingo1
+        : TEXT[currentLanguage].bingoN(bingoCount);
 
     playBingoSound(bingoCount);
-    document.querySelector(".app").classList.add("bingo");
     saveState();
   }
+  if (checkFinished()) {
+    bingoScreen.style.display = "none";
+    document.getElementById("finish-text").textContent =
+      TEXT[currentLanguage].finish;
+    document.getElementById("finish-screen").style.display = "block";
+  }
+}
+function checkFinished() {
+    return markedState.every(v => v);
+  }
+/* ---------------------------
+   INIT FLOW
+---------------------------- */
+
+function startGame(lang) {
+  currentLanguage = lang;
+  localStorage.setItem(LANG_KEY, lang);
+
+  langScreen.style.display = "none";
+  bingoScreen.style.display = "block";
+
+  subtitleEl.textContent = TEXT[lang].subtitle;
+  resetBtn.textContent = TEXT[lang].reset;
+  soundBtn.textContent = TEXT[lang].enableSound;
+
+  loadSounds();
+  createNewBoard();
 }
 
 /* ---------------------------
    EVENTS
 ---------------------------- */
 
-resetBtn.addEventListener("click", () => {
-  localStorage.removeItem(STORAGE_KEY);
-  createNewBoard();
+document.getElementById("lang-en").addEventListener("click", () => {
+  startGame("en");
+});
+
+document.getElementById("lang-gsw").addEventListener("click", () => {
+  startGame("gsw");
 });
 
 soundBtn.addEventListener("click", () => {
-    soundEnabledSound.currentTime = 0;
+  soundEnabledSound.currentTime = 0;
+  soundEnabledSound.play().then(() => {
+    soundEnabled = true;
+    soundBtn.textContent = TEXT[currentLanguage].soundEnabled;
+  }).catch(() => {});
+});
+if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      bingoScreen.style.display = "none";
+      langScreen.style.display = "block";
 
-    soundEnabledSound.play().then(() => {
-      soundEnabled = true;
-      soundBtn.textContent = "🔊 Ton aktiviert";
-    }).catch(() => {});
+      soundEnabled = false;
+      statusEl.textContent = "";
+
+      localStorage.removeItem(STORAGE_KEY);
+    });
+  }
+resetBtn.addEventListener("click", createNewBoard);
+const finishBackBtn = document.getElementById("finish-back-btn");
+
+if (finishBackBtn) {
+  finishBackBtn.addEventListener("click", () => {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LANG_KEY);
+
+    document.getElementById("finish-screen").style.display = "none";
+    bingoScreen.style.display = "none";
+    langScreen.style.display = "block";
+
+    soundEnabled = false;
+    statusEl.textContent = "";
   });
-
+}
 /* ---------------------------
-   INIT
+   AUTO START IF SAVED
 ---------------------------- */
 
-if (!loadState()) {
-  createNewBoard();
-} else {
-  renderBoard();
+const savedLang = localStorage.getItem(LANG_KEY);
+if (savedLang) {
+  startGame(savedLang);
 }

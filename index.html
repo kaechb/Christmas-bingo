@@ -4,21 +4,47 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bullshit Bingo</title>
-
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app">
-    <h1>🎄 Bullshit Bingo 🎄</h1>
-    <p class="subtitle">Berühr Situatione wo passiered</p>
-    <button id="sound-btn">🔊 Mit Ton</button>
-    <div id="bingo-grid" class="grid"></div>
 
-    <button id="reset-btn">Neui Charte</button>
+    <div id="lang-screen">
+      <h1>🎄 Bullshit Bingo 🎄</h1>
+      <p>Select language</p>
 
-    <div id="status" class="status"></div>
+      <div class="lang-buttons">
+        <button id="lang-en" class="lang-btn">🇬🇧</button>
+        <button id="lang-gsw" class="lang-btn">🇨🇭</button>
+      </div>
+    </div>
+
+    <div id="bingo-screen" style="display: none;">
+      <h1>🎄 Bullshit Bingo 🎄</h1>
+      <p class="subtitle" id="subtitle"></p>
+
+      <button id="sound-btn"></button>
+
+      <div id="bingo-grid" class="grid"></div>
+
+      <div class="bottom-bar">
+        <button id="back-btn" class="back-btn">⬅</button>
+        <button id="reset-btn"></button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </div>
   </div>
 
+  <div id="finish-screen" style="display: none;">
+    <div class="finish-container">
+      <h1>🎉 Bingo Complete 🎉</h1>
+
+      <p id="finish-text" class="finish-text"></p>
+
+      <button id="finish-back-btn">⬅ Back to start</button>
+    </div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
